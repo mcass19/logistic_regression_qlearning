@@ -14,26 +14,26 @@ class DataSet(object):
         self.data = data_set
         self.num_instances = 32499
 
-        # arreglo con cantidad de votantes por partido, para luego utilizar 
-        # en el ploteo final de pca
+        # eliminar partidos con menos de 1000 votantes
+        self.data = self.data[self.data.party != 'PERI']
+        self.data = self.data[self.data.party != 'Partido Digital']
+        self.data = self.data[self.data.party != 'Partido Verde']
+        self.data = self.data[self.data.party != 'Partido de Todos']
+        self.data = self.data[self.data.party != 'Partido de los Trabajadores']
+        self.data = self.data[self.data.party != 'Unidad Popular']
+
+        # arreglo con cantidad de votantes por partido
         cant_votes_aux = self.data['party'].value_counts().sort_index()
         for cva in cant_votes_aux.values:
             self.cant_votes_per_party.append(cva)
 
-        # vector de largo cantidad de instancias, con índice de partido político
-        # al que votan para luego utilizar en cálculo de ARI en kmeans
+        # vector de largo cantidad de instancias, con índice de partido político al que votan
         self.votes_per_party = self.data['party']
         self.votes_per_party = np.where(self.votes_per_party == 'Frente Amplio', 0, self.votes_per_party)
         self.votes_per_party = np.where(self.votes_per_party == 'Partido Nacional', 1, self.votes_per_party)
         self.votes_per_party = np.where(self.votes_per_party == 'Partido Colorado', 2, self.votes_per_party)
         self.votes_per_party = np.where(self.votes_per_party == 'La Alternativa', 3, self.votes_per_party)
-        self.votes_per_party = np.where(self.votes_per_party == 'Unidad Popular', 4, self.votes_per_party)
-        self.votes_per_party = np.where(self.votes_per_party == 'Partido de la Gente', 5, self.votes_per_party)
-        self.votes_per_party = np.where(self.votes_per_party == 'PERI', 6, self.votes_per_party)
-        self.votes_per_party = np.where(self.votes_per_party == 'Partido de los Trabajadores', 7, self.votes_per_party)
-        self.votes_per_party = np.where(self.votes_per_party == 'Partido Digital', 8, self.votes_per_party)
-        self.votes_per_party = np.where(self.votes_per_party == 'Partido Verde', 9, self.votes_per_party)
-        self.votes_per_party = np.where(self.votes_per_party == 'Partido de Todos', 10, self.votes_per_party)
+        self.votes_per_party = np.where(self.votes_per_party == 'Partido de la Gente', 4, self.votes_per_party)
 
         # se mantienen solo los atributos correspondientes a las respuestas
         del self.data['id']
