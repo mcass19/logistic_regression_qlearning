@@ -2,47 +2,54 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.decomposition import PCA
 
-import numpy as np
-
 class LogisticRegressionClassifiers(object):
     
     def __init__(self):
-        pass
+        self.data_train = []
+        self.data_test = []
+        self.labels_train = []
+        self.labels_test = []
 
-    def by_party(self, data_set, labels, cant_votes_per_party):
+    def classify(self, data_set, labels):
+        # ejercicio 4 parte b
         # split del data_set en datos y etiquetas, 80% para entrenar y 20% para clasificar
-        data_train, data_test, labels_train, labels_test = train_test_split(data_set, labels, test_size=0.2)
-        # self.compare(data_train, labels_train, data_test, labels_test)
-
+        self.data_train, self.data_test, self.labels_train, self.labels_test = train_test_split(data_set, labels, test_size=0.2)
+    
+        # ejercico 4 parte c 
+        # validaciones cruzadas
+        self.cross_validation_different_penalties(self.data_train, self.data_test)
         print('\n')
 
-        for i in range(2, 26):
+        # ejercicio 4 parte d
+        # se aplica pca para todos los n posibles y luego nuevamente validacion cruzada 
+        # para los datasets resultantes
+        print('----- PCA -----')
+        for i in range(1, 27):
             pca = PCA(n_components=i)
-            aux = pca.fit_transform(data_train)
-
+            reduced_data_set = pca.fit_transform(self.data_train)
+            reduced_data_set_test = pca.fit_transform(self.data_test)
             print('N=' + str(i))
-            self.compare(aux, labels_train, data_test, labels_test)
+            self.cross_validation_different_penalties(reduced_data_set, reduced_data_set_test)
 
-    def compare(self, data_train, labels_train, data_test, labels_test):
-        # self.cross_validation_different_penalties(data_train, labels.astype('int'), 'sag', None)
-        self.cross_validation_different_penalties(data_train, labels_train.astype('int'), 'sag', 'l2', data_test, labels_test.astype('int'))
-        # self.cross_validation_different_penalties(data_train, labels.astype('int'), 'lbfgs', None)
-        self.cross_validation_different_penalties(data_train, labels_train.astype('int'), 'lbfgs', 'l2', data_test, labels_test.astype('int'))
-        # self.cross_validation_different_penalties(data_train, labels.astype('int'), 'newton-cg', None)
-        self.cross_validation_different_penalties(data_train, labels_train.astype('int'), 'newton-cg', 'l2', data_test, labels_test.astype('int'))
-        # self.cross_validation_different_penalties(data_train, labels.astype('int'), 'saga', None)
-        self.cross_validation_different_penalties(data_train, labels_train.astype('int'), 'saga', 'l1', data_test, labels_test.astype('int'))
-        self.cross_validation_different_penalties(data_train, labels_train.astype('int'), 'saga', 'l2', data_test, labels_test.astype('int'))
-        # self.cross_validation_different_penalties(data_train, labels.astype('int'), 'saga', 'elasticnet')
+    # validacion cruzada con diferentes métodos de penalización
+    def cross_validation_different_penalties(self, data_train, data_test):
+        self.cross_validation_and_metrics(data_train, data_test, 'sag', 'l2')
+        self.cross_validation_and_metrics(data_train, data_test, 'lbfgs', 'l2')
+        self.cross_validation_and_metrics(data_train, data_test, 'newton-cg', 'l2')
+        self.cross_validation_and_metrics(data_train, data_test, 'saga', 'l1')
+        self.cross_validation_and_metrics(data_train, data_test, 'saga', 'l2')
 
-    def cross_validation_different_penalties(self, data, labels, solver, penalty, data_test, labels_test):
+    # se crea la instancia de regresión logística con los parámetros pasados y se imprimen los mismos,
+    # calculando accuracy para cada caso
+    def cross_validation_and_metrics(self, data, data_test, solver, penalty):
         logisticRegr = LogisticRegression(solver=solver, penalty=penalty, multi_class='multinomial', max_iter=24681)
-        logisticRegr.fit(data, labels)
+        logisticRegr.fit(data, self.labels_train.astype('int'))
         print('Solver=' + str(solver) + ' - Penalty=' + str(penalty))
-        # score = logisticRegr.score(data_test, labels_test)
-        # print('Accuracy del set de datos evaluados: ' + str(score))
-        cross_val = cross_val_score(logisticRegr, data, labels, cv=3)
+        cross_val = cross_val_score(logisticRegr, data, self.labels_train.astype('int'), cv=3)
         print('Accuracy de validación cruzada: ' + str(cross_val))
 
-    def by_candidate(self):
-        pass
+        # ejercicio 4 parte e
+        # se calcula accuracy, precision, recall, medida f y matriz de confusion
+        score = logisticRegr.score(data_test, self.labels_test.astype('int'))
+        print('Accuracy del set de datos a predecir: ' + str(score), '\n')
+

@@ -4,7 +4,8 @@ from logistic_regression.classifiers import LogisticRegressionClassifiers
 import random
 from chinese_checkers.board import Board
 from chinese_checkers.game import Game
-from chinese_checkers.players.playerAI_qlearning import PlayerAI
+from chinese_checkers.players.playerAI import PlayerAI
+from chinese_checkers.players.playerAI_qlearning import PlayerAIQLearning
 from chinese_checkers.players.playerRandom import PlayerRandom
 
 print('*****************************************')
@@ -25,9 +26,9 @@ if option_algorithm == 1:
     print('\n')
 
     if option_classifier == 1:
-        classifier.by_party(data_set.data, data_set.votes_per_party, data_set.cant_votes_per_party)
+        classifier.classify(data_set.data, data_set.votes_per_party)
     elif option_classifier == 2:
-        classifier.by_candidate()
+        classifier.by_candidate(data_set.data, data_set.cant_votes_per_party)
 elif option_algorithm == 2:
     wons_p1 = 0     # Partidas ganados jugador 1
     wons_p2 = 0     # Partidas ganados jugador 2

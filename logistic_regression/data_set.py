@@ -14,6 +14,7 @@ class DataSet(object):
         self.data = data_set
         self.num_instances = 32499
 
+        # ejercico 4 parte a
         # eliminar partidos con menos de 1000 votantes
         self.data = self.data[self.data.party != 'PERI']
         self.data = self.data[self.data.party != 'Partido Digital']
@@ -44,7 +45,7 @@ class DataSet(object):
 
     def prepare_data(self):
         # se importan los datos utilizando pandas
-        data = pd.read_csv("data.csv")
+        data = pd.read_csv("logistic_regression/data.csv")
 
         # tabla de candidatos 
         candidates = pd.DataFrame(
