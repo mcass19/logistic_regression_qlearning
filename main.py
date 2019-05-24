@@ -12,23 +12,40 @@ print('*****************************************')
 print('REGRESION LOGISTICA Y Q-LEARNING')
 print('*****************************************')
 
-option_algorithm = int(input('Ingrese 1 si desea ejecutar los clasificadores basados en regresión logística \no 2 si desea ejecutar el nuevo jugador de damas chinas implementado con q-learning: '))
+option_algorithm = int(input('Ingrese 1 si desea ejecutar los clasificadores basados en regresión logística, \no 2 si desea ejecutar el nuevo jugador de damas chinas implementado con q-learning: '))
 print('\n')
 
 if option_algorithm == 1:
-    # manejo de los datos
-    data_set = DataSet()
-    data_prepared = data_set.prepare_data()
-    data_set.load_data_set(data_prepared)
-
-    classifier = LogisticRegressionClassifiers()
-    option_classifier = int(input('Ingrese 1 si desea predecir los partidos políticos \no 2 si desea predecir los candidatos: '))
+    option_classifier = int(input('Ingrese 1 si desea construir un clasificador para predecir los partidos políticos, \no 2 si desea construir un clasificador para predecir los candidatos: '))
     print('\n')
 
+    k = int(input('Ingrese la cantidad de pliegues que desea utilizar para realizar validación cruzada (k-folds): '))
+    print('\n')
+
+    classifier = LogisticRegressionClassifiers(k)
+
     if option_classifier == 1:
-        classifier.classify(data_set.data, data_set.votes_per_party)
+        # manejo de los datos
+        data_set = DataSet()
+        data_prepared = data_set.prepare_data()
+        data_set.load_data_set(data_prepared)
+
+        classifier.classify(data_set.data, data_set.votes_per_party, data_set.labels_parties)
+        print('************************************************************************************************************************', '\n')
+        classifier.reprint_data()
     elif option_classifier == 2:
-        classifier.by_candidate(data_set.data, data_set.cant_votes_per_party)
+        # manejo de los datos
+        data_set = DataSet()
+        data_prepared = data_set.prepare_data()
+        data_set.load_data_set(data_prepared, False)
+
+        classifier.classify(data_set.data, data_set.votes_per_candidate, data_set.labels_candidates)
+        print('************************************************************************************************************************', '\n')
+        classifier.reprint_data()
+
+        option_party = int(input('Ingrese 1 si desea predecir los partidos políticos con este clasificador, u otro número si no: '))
+        if (option_party == 1):
+            classifier.party_by_candidate(data_set.data, data_set.votes_per_party, data_set.labels_parties)
 elif option_algorithm == 2:
     wons_p1 = 0     # Partidas ganados jugador 1
     wons_p2 = 0     # Partidas ganados jugador 2
