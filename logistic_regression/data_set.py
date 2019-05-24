@@ -12,12 +12,12 @@ class DataSet(object):
         self.votes_per_party = []
         self.labels_parties = []
 
-    def load_data_set(self, data_set, party=True):    
+    def load_data_set(self, data_set, candidates=True):    
         self.data = data_set
         self.num_instances = 32499
 
         # ejercico 4 parte a
-        # eliminar partidos y/o candidatos con menos de 1000 votantes
+        # eliminar partidos con menos de 1000 votantes
         self.data = self.data[self.data.party != 'PERI']
         self.data = self.data[self.data.party != 'Partido Digital']
         self.data = self.data[self.data.party != 'Partido Verde']
@@ -25,17 +25,9 @@ class DataSet(object):
         self.data = self.data[self.data.party != 'Partido de los Trabajadores']
         self.data = self.data[self.data.party != 'Unidad Popular']
        
-        if party:
-            # vector de largo cantidad de instancias, con índice de partido político al que votan
-            self.votes_per_party = self.data['party']
-            self.votes_per_party = np.where(self.votes_per_party == 'Frente Amplio', 0, self.votes_per_party)
-            self.votes_per_party = np.where(self.votes_per_party == 'La Alternativa', 1, self.votes_per_party)
-            self.votes_per_party = np.where(self.votes_per_party == 'Partido Colorado', 2, self.votes_per_party)
-            self.votes_per_party = np.where(self.votes_per_party == 'Partido Nacional', 3, self.votes_per_party)
-            self.votes_per_party = np.where(self.votes_per_party == 'Partido de la Gente', 4, self.votes_per_party)
-
-            self.labels_parties = [0, 1, 2, 3, 4]
-        else:
+        if candidates:
+            # ejercico 4 parte a
+            # eliminar candidatos con menos de 1000 votantes
             self.data = self.data[self.data.name != 'Carlos Iafigliola']
             self.data = self.data[self.data.name != 'Edgardo Martínez']
             self.data = self.data[self.data.name != 'Enrique Antía']
@@ -59,6 +51,16 @@ class DataSet(object):
             self.votes_per_candidate = np.where(self.votes_per_candidate == 'Pablo Mieres', 10, self.votes_per_candidate)
 
             self.labels_candidates = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+        # vector de largo cantidad de instancias, con índice de partido político al que votan
+        self.votes_per_party = self.data['party']
+        self.votes_per_party = np.where(self.votes_per_party == 'Frente Amplio', 0, self.votes_per_party)
+        self.votes_per_party = np.where(self.votes_per_party == 'La Alternativa', 1, self.votes_per_party)
+        self.votes_per_party = np.where(self.votes_per_party == 'Partido Colorado', 2, self.votes_per_party)
+        self.votes_per_party = np.where(self.votes_per_party == 'Partido Nacional', 3, self.votes_per_party)
+        self.votes_per_party = np.where(self.votes_per_party == 'Partido de la Gente', 4, self.votes_per_party)
+
+        self.labels_parties = [0, 1, 2, 3, 4]
 
         # se mantienen solo los atributos correspondientes a las respuestas
         del self.data['id']

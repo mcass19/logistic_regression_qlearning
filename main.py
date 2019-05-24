@@ -32,20 +32,21 @@ if option_algorithm == 1:
 
         classifier.classify(data_set.data, data_set.votes_per_party, data_set.labels_parties)
         print('************************************************************************************************************************', '\n')
-        classifier.reprint_data()
+        classifier.reprint_metrics()
     elif option_classifier == 2:
         # manejo de los datos
         data_set = DataSet()
         data_prepared = data_set.prepare_data()
-        data_set.load_data_set(data_prepared, False)
+        data_set.load_data_set(data_prepared, True)
 
         classifier.classify(data_set.data, data_set.votes_per_candidate, data_set.labels_candidates)
         print('************************************************************************************************************************', '\n')
-        classifier.reprint_data()
+        classifier.reprint_metrics()
 
         option_party = int(input('Ingrese 1 si desea predecir los partidos políticos con este clasificador, u otro número si no: '))
+        print('\n')
         if (option_party == 1):
-            classifier.party_by_candidate(data_set.data, data_set.votes_per_party, data_set.labels_parties)
+            classifier.party_by_candidate_classifier(data_set.data, data_set.votes_per_party)
 elif option_algorithm == 2:
     wons_p1 = 0     # Partidas ganados jugador 1
     wons_p2 = 0     # Partidas ganados jugador 2
