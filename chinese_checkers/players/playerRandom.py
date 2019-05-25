@@ -111,9 +111,13 @@ class PlayerRandom(Player):
         return result
 
     #--------------------------------------------------------------------------------------------
+    # definición de procedimientos para ser robusto con lo ya implementado
     
     def recalc_weights(self, board):
         pass
 
     def set_actual_value_board(self, board):
+        pass
+    
+    def set_prev_value_board(self, board):
         pass
