@@ -61,11 +61,14 @@ elif option_algorithm == 2:
         # Crea los jugadores
         # PlayerAI recibe: Número de jugador, Tasa de aprendizaje, Aprendizaje activado/desactivado 
         p1 = PlayerAI(1, 0.001, False)
+        # p2 = PlayerAI(2, 0.001, False)
 
         # PlayerRandom solo recibe el número de jugador 
-        # p1 = PlayerRandom(1) 
+        # p1 = PlayerRandom(1)
+        # p2 = PlayerRandom(2) 
 
         # PlayerAIQLearning recibe: Número de jugador, Tasa de aprendizaje
+        # p1 = PlayerAIQLearning(1, 0.1)
         p2 = PlayerAIQLearning(2, 0.1)
 
         game = Game(board)

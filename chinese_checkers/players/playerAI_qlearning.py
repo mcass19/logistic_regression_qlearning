@@ -16,14 +16,18 @@ class PlayerAIQLearning(Player):
 
         # RED NEURONAL
         self.inputs = tf.placeholder(shape=[6], dtype=tf.float32)
+        self.fetches = self.inputs
+
         self.nextQ = tf.placeholder(shape=[6], dtype=tf.float32)
+        self.outQ = tf.placeholder(shape=[6], dtype=tf.float32)
+        self.weights = tf.Variable(tf.ones([6], dtype=tf.dtypes.float32))
 
-        self.fetches = self.inputs * 1
-        # self.cost = tf.reduce_sum(tf.square(self.nextQ - tf.Variable(tf.random_uniform([6], 0, 0.1))))
-        # self.optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate).minimize(self.cost)
+        self.loss = -(tf.log(self.nextQ) * self.weights)
+        self.optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate).minimize(self.loss)
 
-        init = tf.global_variables_initializer()
         self.sess = tf.Session()
+        init = tf.global_variables_initializer()
+        self.sess.run(init)
         
     #--------------------------------------------------------------------------------------------
     
@@ -243,16 +247,16 @@ class PlayerAIQLearning(Player):
         if self.id == 1:
             self.coefficients[0] = self.distance_average(board.pieces_p1, board.target_p1[0])
             self.coefficients[1] = self.distance_average(board.pieces_p2, board.target_p2[0])
-            self.coefficients[1] = self.in_opponent_base(board.pieces_p1, board.target_p1)
+            self.coefficients[2] = self.in_opponent_base(board.pieces_p1, board.target_p1)
             self.coefficients[3] = self.in_opponent_base(board.pieces_p2, board.target_p2)
-            self.coefficients[2] = self.distance_average_not_in_base(board.pieces_p1, board.target_p1)
+            self.coefficients[4] = self.distance_average_not_in_base(board.pieces_p1, board.target_p1)
             self.coefficients[5] = self.distance_average_not_in_base(board.pieces_p2, board.target_p2)
         else:
             self.coefficients[0] = self.distance_average(board.pieces_p2, board.target_p2[0])
             self.coefficients[1] = self.distance_average(board.pieces_p1, board.target_p1[0])
-            self.coefficients[1] = self.in_opponent_base(board.pieces_p2, board.target_p2)
+            self.coefficients[2] = self.in_opponent_base(board.pieces_p2, board.target_p2)
             self.coefficients[3] = self.in_opponent_base(board.pieces_p1, board.target_p1)
-            self.coefficients[2] = self.distance_average_not_in_base(board.pieces_p2, board.target_p2)
+            self.coefficients[4] = self.distance_average_not_in_base(board.pieces_p2, board.target_p2)
             self.coefficients[5] = self.distance_average_not_in_base(board.pieces_p1, board.target_p1)
 
         q = self.sess.run(self.fetches, feed_dict={self.inputs:self.coefficients})
@@ -277,13 +281,13 @@ class PlayerAIQLearning(Player):
             _board.pieces_p1[piece_to_move] = position_to_move
         else:
             _board.pieces_p2[piece_to_move] = position_to_move
-        _, _ = self.q_and_reward_value(_board)
+        self.outQ, _ = self.q_and_reward_value(_board)
 
         # se halla Q
         targetQ = reward + (self.y * q_max)
 
         # entrenamiento
-        _ = self.sess.run(self.fetches, feed_dict={self.inputs:self.coefficients, self.nextQ:targetQ})
+        _ = self.sess.run([self.weights, self.optimizer], feed_dict={self.inputs:self.coefficients, self.nextQ:targetQ})
 
         return piece_to_move, position_to_move
 

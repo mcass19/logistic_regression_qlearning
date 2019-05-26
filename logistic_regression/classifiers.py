@@ -68,18 +68,24 @@ class LogisticRegressionClassifiers(object):
 
     # validacion cruzada con diferentes métodos de penalización
     def cross_validation_different_penalties(self, data_train, data_test, with_pca = False, n = 0):
-        self.cross_validation_and_metrics(data_train, data_test, 'sag', 'l2', with_pca, n)
-        self.cross_validation_and_metrics(data_train, data_test, 'lbfgs', 'l2', with_pca, n)
-        self.cross_validation_and_metrics(data_train, data_test, 'newton-cg', 'l2', with_pca, n)
-        self.cross_validation_and_metrics(data_train, data_test, 'saga', 'l1', with_pca, n)
-        self.cross_validation_and_metrics(data_train, data_test, 'saga', 'l2', with_pca, n)
+        self.cross_validation_and_metrics(data_train, data_test, 'sag', 'l2', 'ovr', with_pca, n)
+        self.cross_validation_and_metrics(data_train, data_test, 'lbfgs', 'l2', 'ovr', with_pca, n)
+        self.cross_validation_and_metrics(data_train, data_test, 'newton-cg', 'l2', 'ovr', with_pca, n)
+        self.cross_validation_and_metrics(data_train, data_test, 'saga', 'l1', 'ovr', with_pca, n)
+        self.cross_validation_and_metrics(data_train, data_test, 'saga', 'l2','ovr', with_pca, n)
+
+        self.cross_validation_and_metrics(data_train, data_test, 'sag', 'l2', 'multinomial', with_pca, n)
+        self.cross_validation_and_metrics(data_train, data_test, 'lbfgs', 'l2', 'multinomial', with_pca, n)
+        self.cross_validation_and_metrics(data_train, data_test, 'newton-cg', 'l2', 'multinomial', with_pca, n)
+        self.cross_validation_and_metrics(data_train, data_test, 'saga', 'l1', 'multinomial', with_pca, n)
+        self.cross_validation_and_metrics(data_train, data_test, 'saga', 'l2','multinomial', with_pca, n)
 
     # se crea la instancia de regresión logística con los parámetros pasados y se imprimen los mismos,
     # calculando accuracy para cada caso
-    def cross_validation_and_metrics(self, data, data_test, solver, penalty, with_pca, n):
-        logisticRegr = LogisticRegression(solver=solver, penalty=penalty, multi_class='multinomial', max_iter=24681)
+    def cross_validation_and_metrics(self, data, data_test, solver, penalty, multi_class, with_pca, n):
+        logisticRegr = LogisticRegression(solver=solver, penalty=penalty, multi_class=multi_class, max_iter=24681)
         logisticRegr.fit(data, self.labels_train.astype('int'))
-        print('Clasificador basado en regresión logística con solver=' + str(solver) + ' y penalty=' + str(penalty))
+        print('Clasificador basado en regresión logística con multi_class=' + str(multi_class) + ', solver=' + str(solver) + ' y penalty=' + str(penalty))
         cross_val = cross_val_score(logisticRegr, data, self.labels_train.astype('int'), cv=self.k)
         print('Accuracy de validación cruzada: ' + str(cross_val))
 
@@ -182,6 +188,10 @@ class LogisticRegressionClassifiers(object):
         print('\n')
         print('El mejor n es: ' + str(best_n))
 
+        pca = PCA(n_components=best_n)
+        reduced_data_set = pca.fit_transform(data_train)
+        self.classifier.fit(reduced_data_set, labels_train.astype('int'))
         predictions = self.classifier.predict(data_test)
+        
         accuracy = accuracy_score(_party_by_candidate, predictions)
         print('Accuracy entre partidos asociados a los candidatos predecidos, y partidos predecidos \ncon el clasificador de candidatos: ' + str(accuracy))
