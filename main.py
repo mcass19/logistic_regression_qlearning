@@ -12,7 +12,7 @@ print('*****************************************')
 print('REGRESION LOGISTICA Y Q-LEARNING')
 print('*****************************************')
 
-option_algorithm = int(input('Ingrese 1 si desea ejecutar los clasificadores basados en regresión logística, \no 2 si desea ejecutar el nuevo jugador de damas chinas implementado con q-learning: '))
+option_algorithm = int(input('Ingrese 1 si desea ejecutar los clasificadores basados en regresión logística, \no 2 si desea entrenar y jugar con el nuevo jugador de damas chinas implementado con q-learning: '))
 print('\n')
 
 if option_algorithm == 1:
@@ -48,55 +48,65 @@ if option_algorithm == 1:
         if (option_party == 1):
             classifier.party_by_candidate_classifier(data_set.data, data_set.votes_per_party)
 elif option_algorithm == 2:
-    wons_p1 = 0     # Partidas ganados jugador 1
-    wons_p2 = 0     # Partidas ganados jugador 2
-    draws = 0       # Empates
-    cant_init_1 = 0 # Partidas iniciadas jugador 1 
-    cant_init_2 = 0 # Partidas iniciadas jugador 2
+    play = True
 
-    for i in range(100):
-        # Crea el tablero
-        board = Board(9, 9)
+    # Crea los jugadores
+    # PlayerAI recibe: Número de jugador, Tasa de aprendizaje, Aprendizaje activado/desactivado 
+    p1 = PlayerAI(1, 0.001, False)
+    # p2 = PlayerAI(2, 0.001, False)
 
-        # Crea los jugadores
-        # PlayerAI recibe: Número de jugador, Tasa de aprendizaje, Aprendizaje activado/desactivado 
-        p1 = PlayerAI(1, 0.001, False)
-        # p2 = PlayerAI(2, 0.001, False)
+    # PlayerRandom solo recibe el número de jugador 
+    # p1 = PlayerRandom(1)
+    # p2 = PlayerRandom(2) 
 
-        # PlayerRandom solo recibe el número de jugador 
-        # p1 = PlayerRandom(1)
-        # p2 = PlayerRandom(2) 
+    # PlayerAIQLearning recibe: Número de jugador, Tasa de aprendizaje
+    # p1 = PlayerAIQLearning(1, 0.1)
+    p2 = PlayerAIQLearning(2, 0.001)
 
-        # PlayerAIQLearning recibe: Número de jugador, Tasa de aprendizaje
-        # p1 = PlayerAIQLearning(1, 0.1)
-        p2 = PlayerAIQLearning(2, 0.1)
+    while play:
+        wons_p1 = 0     # Partidas ganados jugador 1
+        wons_p2 = 0     # Partidas ganados jugador 2
+        draws = 0       # Empates
+        cant_init_1 = 0 # Partidas iniciadas jugador 1 
+        cant_init_2 = 0 # Partidas iniciadas jugador 2
 
-        game = Game(board)
+        for i in range(100):
+            # Crea el tablero y juego
+            board = Board(9, 9)
+            game = Game(board)
 
-        # Se elije al azar un jugador que inicia la partida
-        if random.choice([True, False]):
-            cant_init_1 += 1
-            winner = game.play_game(p1, p2, 1)
-            if winner == 1:
-                wons_p1 += 1
-            elif winner == 2:
-                wons_p2 += 1
+            # Se elije al azar un jugador que inicia la partida
+            if random.choice([True, False]):
+                cant_init_1 += 1
+                winner = game.play_game(p1, p2, 1)
+                if winner == 1:
+                    wons_p1 += 1
+                elif winner == 2:
+                    wons_p2 += 1
+                else:
+                    draws += 1
             else:
-                draws += 1
-        else:
-            cant_init_2 += 1
-            winner = game.play_game(p1, p2, 2)
-            if winner == 1:
-                wons_p1 += 1
-            elif winner == 2:
-                wons_p2 += 1
-            else:
-                draws += 1
+                cant_init_2 += 1
+                winner = game.play_game(p1, p2, 2)
+                if winner == 1:
+                    wons_p1 += 1
+                elif winner == 2:
+                    wons_p2 += 1
+                else:
+                    draws += 1
 
-        print('Partido {} finalizado'.format(i))
+            print('Partido {} finalizado'.format(i))
 
-    print('Player 1 gano {} veces'.format(wons_p1))
-    print('Player 2 gano {} veces'.format(wons_p2))
-    print('Empataron {} veces'.format(draws))
-    print('Empezo {} veces el jugador 1'.format(cant_init_1))
-    print('Empezo {} veces el jugador 2'.format(cant_init_2))
+        print('Player 1 gano {} veces'.format(wons_p1))
+        print('Player 2 gano {} veces'.format(wons_p2))
+        print('Empataron {} veces'.format(draws))
+        print('Empezo {} veces el jugador 1'.format(cant_init_1))
+        print('Empezo {} veces el jugador 2'.format(cant_init_2))
+        
+        option_playing = int(input('Ingrese 1 si desea volver a jugar ahora con el/los jugador/es ya entrenado/s u\notro número si no: '))
+        play = (option_playing == 1)
+        if play:
+            # Cambiar dependiendo de si jugador 1 y/o 2 es el implementado con q_learning_neural_network, 
+            # y se lo/s quiere dejar de entrenar
+            # p1.train = False
+            p2.train = False

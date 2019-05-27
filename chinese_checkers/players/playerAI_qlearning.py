@@ -7,22 +7,21 @@ from chinese_checkers.players.player import Player
 
 class PlayerAIQLearning(Player):
 
-    def __init__(self, id, learning_rate):
+    def __init__(self, id, learning_rate, train = True):
         super().__init__(id)
 
         self.coefficients = [0, 0, 0, 0, 0, 0]
         self.q_reward_movements = []
         self.y = .99
+        self.train = train
 
         # RED NEURONAL
         self.inputs = tf.placeholder(shape=[6], dtype=tf.float32)
         self.fetches = self.inputs
-
         self.nextQ = tf.placeholder(shape=[6], dtype=tf.float32)
-        self.outQ = tf.placeholder(shape=[6], dtype=tf.float32)
-        self.weights = tf.Variable(tf.ones([6], dtype=tf.dtypes.float32))
 
-        self.loss = -(tf.log(self.nextQ) * self.weights)
+        self.weights = tf.Variable(tf.ones([6], dtype=tf.dtypes.float32))
+        self.loss = -(tf.log(self.weights) * self.nextQ)
         self.optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate).minimize(self.loss)
 
         self.sess = tf.Session()
@@ -117,6 +116,7 @@ class PlayerAIQLearning(Player):
             pieces = board.pieces_p2
             
         max_value = float('-inf')
+        self.q_reward_movements = []
         position_to_move = (0,0) 
         piece_to_move = 0
         can_move = False
@@ -235,7 +235,6 @@ class PlayerAIQLearning(Player):
     
     # Devuelve el valor q de una acción o movimiento dado
     def q_and_reward_value(self, board) -> float:
-
         reward = 0
         end, winner = board.end_of_game()
         if end:
@@ -275,19 +274,21 @@ class PlayerAIQLearning(Player):
                 piece_to_move = item[2][0]
                 position_to_move = item[2][1]
 
-        # se simula movimiento
+        # se simula movimiento nuevamente, para que en self.coefficients queden los valores 
+        # correspondientes al movimiento de mejor q
         _board = board
         if(self.id == 1):
             _board.pieces_p1[piece_to_move] = position_to_move
         else:
             _board.pieces_p2[piece_to_move] = position_to_move
-        self.outQ, _ = self.q_and_reward_value(_board)
+        _, _ = self.q_and_reward_value(_board)
 
-        # se halla Q
+        # se halla Q para entrenar
         targetQ = reward + (self.y * q_max)
 
         # entrenamiento
-        _ = self.sess.run([self.weights, self.optimizer], feed_dict={self.inputs:self.coefficients, self.nextQ:targetQ})
+        if self.train:
+            _ = self.sess.run([self.weights, self.optimizer], feed_dict={self.inputs:self.coefficients, self.nextQ:targetQ})
 
         return piece_to_move, position_to_move
 
